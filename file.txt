@@ -1,0 +1,49 @@
+using Microsoft.AspNetCore.Mvc;
+using Dell.Purchase.ToolSuiteService.Domain.Models.Response;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using Dell.Purchase.ToolSuiteService.Services.Services.MongoDBService;
+using MongoDB.Bson.Serialization.IdGenerators;
+using System.Net;
+using Dell.Purchase.ToolSuiteService.Domain.Models;
+using System;
+
+namespace Dell.Purchase.ToolSuiteService.Api.Controllers
+{
+    [ApiController]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/CacheAuthorization")]
+    public class AuthorizationController : BaseController
+    {
+        private readonly IAuthorizationService _authorizationservice;
+
+        public AuthorizationController(IAuthorizationService authorizationservice)
+        {
+            _authorizationservice = authorizationservice;
+        }
+
+        [HttpGet("SsoUrl")]
+        public IActionResult GetSsoUrl ()
+        {
+            return Ok(_authorizationservice.GetSsoUrl());
+        }
+
+        [HttpPost("Authorize")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> UpdateUserDetails(AuthorizationModel authorizationInfo)
+        {
+            await _authorizationservice.UpdateUserDetails(authorizationInfo);
+
+            return Ok();
+        }
+
+        [HttpGet("Authorize/{UserName}")]
+        [ProducesDefaultResponseType(typeof(List<LoginModel>))]
+        public async Task<IActionResult> GetUserDetails(string UserName)
+        {
+            var response = await _authorizationservice.GetUserDetails(UserName);
+            return Ok(response);
+        }
+    }
+}
+
